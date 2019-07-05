@@ -1,8 +1,6 @@
 # tradebinder
 Simple python program to generate 4x3 binders of cards from you .csv
 
-Thanks to Vitalyi Krytov for inspiration.
-
 
 It uses sryfall.com as card image source.
 
