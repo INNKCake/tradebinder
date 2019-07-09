@@ -8,10 +8,9 @@ def csv_convert(filename):
         data = csv.reader(file, delimiter=';')
         name = set = ''
         filename = os.path.splitext(filename)[0]
-        os.mkdir(filename + '_img') 
+        if (os.path.isdir(filename + '_img') == 0):
+            os.mkdir(filename + '_img') 
         for row in data:
             name = row[0]
             set = row[1]
             images.get_image(name, set, filename)
-    
-    
