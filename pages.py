@@ -2,8 +2,11 @@
 import os
 from PIL import Image
 import images
+import shutil
 
 def make_pages(name):
+    if (os.path.isdir(name + '_img_backup') == 0):
+            os.mkdir(name + '_img_backup') 
     pages = round(len(os.listdir(name + '_img'))/12 + 0.5)
     for page in range(0, pages):
         base_x = 223
@@ -24,7 +27,8 @@ def make_pages(name):
                     index += 1
                     counter += 1
                     if os.path.isfile(f_path):
-                            os.unlink(f_path)
+                        shutil.copy2(f_path, name + '_img_backup')
+                        os.unlink(f_path)
                     if counter == 12:
                         images.write_page(new_im, page, name)
                         break
@@ -35,4 +39,4 @@ def make_pages(name):
             images.write_page(new_im, page, name)
             break
     for page in range(0, pages):
-        os.renames((name + '_' + str(page) + '.png'), (os.path.join(name + '_img', name + '_' + str(page) + '.png')))
+        os.renames((name + '_' + str(page) + '.jpg'), (os.path.join(name + '_img', name + '_' + str(page) + '.jpg')))
