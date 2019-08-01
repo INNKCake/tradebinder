@@ -3,8 +3,9 @@ import pages
 import os
 
 filename = input('Enter filename with extention: ')
+if (os.path.isdir('images') == 0):
+    os.mkdir('images')
 csv_convert(filename)
 name = os.path.splitext(filename)[0]
-z = input('Make pages(y/n)?\n')
-if z.lower() == 'y':
-    pages.make_pages(name)
+pages.make_pages(name)
+print('Done!')
