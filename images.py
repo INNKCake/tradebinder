@@ -9,7 +9,7 @@ import shutil
 
 def get_image(name, set, filename):
     try:       
-        if (os.path.isfile('images/{}_{}.jpg'.format(name, set)) == 0):
+        if (os.path.isfile('images/{}_{}.jpg'.format(set, name)) == 0):
             api_url = "https://api.scryfall.com/cards/search?q=!"
             if set == 'Promo':
                 set = ''
@@ -21,48 +21,59 @@ def get_image(name, set, filename):
                     set = i['set_name']
                     print('Downloading {} from {}'.format(name, set))
                     img_data = requests.get(i['image_uris']['border_crop']).content
-                    with open('images/{}_{}.jpg'.format(name, set), 'wb') as imghandler:
+                    with open('images/{}_{}.jpg'.format(set, name), 'wb') as imghandler:
                         imghandler.write(img_data)
         else:
-            print('Found {} from {}'.format(name, set))
-        shutil.copy2('images/{}_{}.jpg'.format(name, set), '{}_img/{}_{}.jpg'.format(filename, name, set))
+            print('Found {} from {}'.format(set, name))
+        shutil.copy2('images/{}_{}.jpg'.format(set, name), '{}_img/{}_{}.jpg'.format(filename, set, name))
         return set
 
     except Exception as e:
         if data['object'] == 'error':
-            print('{} from {} : {}'.format(name, set, data['details']))
+            print('{} from {} : {}'.format(set, name, data['details']))
 
         if e.args[0] == 'image_uris':
             img_data = requests.get(i['card_faces'][0]['image_uris']['border_crop']).content
-            with open('images/{}_1_{}.jpg'.format(name, set), 'wb') as imghandler:
+            with open('images/{}_1_{}.jpg'.format(set, name), 'wb') as imghandler:
                     imghandler.write(img_data)
-            shutil.copy2('images/{}_1_{}.jpg'.format(name, set), '{}_img/{}_1_{}.jpg'.format(filename, name, set))
+            shutil.copy2('images/{}_1_{}.jpg'.format(set, name), '{}_img/{}_1_{}.jpg'.format(filename, set, name))
             img_data = requests.get(i['card_faces'][1]['image_uris']['border_crop']).content
-            with open('images/{}_2_{}.jpg'.format(name, set), 'wb') as imghandler:
+            with open('images/{}_2_{}.jpg'.format(set, name), 'wb') as imghandler:
                     imghandler.write(img_data)
-            shutil.copy2('images/{}_2_{}.jpg'.format(name, set), '{}_img/{}_2_{}.jpg'.format(filename, name, set))
+            shutil.copy2('images/{}_2_{}.jpg'.format(set, name), '{}_img/{}_2_{}.jpg'.format(filename, set, name))
         return set
 
-def edit_image(filename, name, set, lang, foil, quantity, promo):
+def edit_image(filename, set, name, lang, foil, quantity, promo, foilsheet):
     try:
-        if (os.path.isfile('{}_img/{}_{}.jpg'.format(filename, name, set)) == 1):
+        if (os.path.isfile('{}_img/{}_{}.jpg'.format(filename, set, name)) == 1):
             if foil == 'foil':
-                foil_image('{}_img/{}_{}.jpg'.format(filename, name, set))
-            write_text('{}_img/{}_{}.jpg'.format(filename, name, set), 'Количество: {}'.format(quantity), 40, 80)
-            write_text('{}_img/{}_{}.jpg'.format(filename, name, set), lang, 40, 120)
+                foil_image('{}_img/{}_{}.jpg'.format(filename, set, name))
+            write_text('{}_img/{}_{}.jpg'.format(filename, set, name), 'Количество: {}'.format(quantity), 40, 80)
+            write_text('{}_img/{}_{}.jpg'.format(filename, set, name), lang, 40, 120)
             if promo:
-                write_text('{}_img/{}_{}.jpg'.format(filename, name, set), 'Промо', 40, 160)
-            os.rename('{}_img/{}_{}.jpg'.format(filename, name, set), '{}_img/{}{}{}{}{}.jpg'.format(filename, name, set, lang, promo, foil))
-        elif (os.path.isfile('{}_img/{}_1_{}.jpg'.format(filename, name, set)) == 1):
+                write_text('{}_img/{}_{}.jpg'.format(filename, set, name), 'Промо', 40, 160)
+            os.rename('{}_img/{}_{}.jpg'.format(filename, set, name), '{}_img/{}{}{}{}{}.jpg'.format(filename, set, name, lang, promo, foil))
+            if foilsheet and (foil == 'foil'):
+                shutil.copy2('{}_img/{}{}{}{}{}.jpg'.format(filename, set, name, lang, promo, foil), '{}_foil_img/{}{}{}{}{}.jpg'.format(filename, set, name, lang, promo, foil))
+                if os.path.isfile('{}_img/{}{}{}{}{}.jpg'.format(filename, set, name, lang, promo, foil)):
+                    os.unlink('{}_img/{}{}{}{}{}.jpg'.format(filename, set, name, lang, promo, foil))
+        elif (os.path.isfile('{}_img/{}_1_{}.jpg'.format(filename, set, name)) == 1):
             if foil == 'foil':
-                foil_image('{}_img/{}_1_{}.jpg'.format(filename, name, set))
-                foil_image('{}_img/{}_2_{}.jpg'.format(filename, name, set))
-            write_text('{}_img/{}_1_{}.jpg'.format(filename, name, set), 'Количество: {}'.format(quantity), 40, 80)
-            write_text('{}_img/{}_1_{}.jpg'.format(filename, name, set), lang, 40, 120)
+                foil_image('{}_img/{}_1_{}.jpg'.format(filename, set, name))
+                foil_image('{}_img/{}_2_{}.jpg'.format(filename, set, name))
+            write_text('{}_img/{}_1_{}.jpg'.format(filename, set, name), 'Количество: {}'.format(quantity), 40, 80)
+            write_text('{}_img/{}_1_{}.jpg'.format(filename, set, name), lang, 40, 120)
             if promo:
-                write_text('{}_img/{}_1_{}.jpg'.format(filename, name, set), 'Промо', 40, 160)
-            os.rename('{}_img/{}_1_{}.jpg'.format(filename, name, set), '{}_img/{}1{}{}{}{}.jpg'.format(filename, name, set, lang, promo, foil)) 
-            os.rename('{}_img/{}_2_{}.jpg'.format(filename, name, set), '{}_img/{}2{}{}{}{}.jpg'.format(filename, name, set, lang, promo, foil)) 
+                write_text('{}_img/{}_1_{}.jpg'.format(filename, set, name), 'Промо', 40, 160)
+            os.rename('{}_img/{}_1_{}.jpg'.format(filename, set, name), '{}_img/{}1{}{}{}{}.jpg'.format(filename, set, name, lang, promo, foil)) 
+            os.rename('{}_img/{}_2_{}.jpg'.format(filename, set, name), '{}_img/{}2{}{}{}{}.jpg'.format(filename, set, name, lang, promo, foil))
+            if foilsheet and foil == 'foil':
+                shutil.copy2('{}_img/{}1{}{}{}{}.jpg'.format(filename, set, name, lang, promo, foil), '{}_foil_img/{}1{}{}{}{}.jpg'.format(filename, set, name, lang, promo, foil))
+                shutil.copy2('{}_img/{}2{}{}{}{}.jpg'.format(filename, set, name, lang, promo, foil), '{}_foil_img/{}2{}{}{}{}.jpg'.format(filename, set, name, lang, promo, foil))
+                if os.path.isfile('{}_img/{}1{}{}{}{}.jpg'.format(filename, set, name, lang, promo, foil)):
+                    os.unlink('{}_img/{}1{}{}{}{}.jpg'.format(filename, set, name, lang, promo, foil))
+                if os.path.isfile('{}_img/{}2{}{}{}{}.jpg'.format(filename, set, name, lang, promo, foil)):
+                    os.unlink('{}_img/{}2{}{}{}{}.jpg'.format(filename, set, name, lang, promo, foil))  
     except Exception as e:
             print(e)
 
@@ -95,7 +106,6 @@ def foil_image(image):
 
 def save_page(img, page, name):
     try:
-        page_name = '{}_{}.jpg'.format(name, page)
-        img.save(page_name)
+        img.save('{}_{}.jpg'.format(name, page))
     except Exception as e:
         print(e)
