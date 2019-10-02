@@ -7,30 +7,41 @@ import os
 import re
 import shutil
 
-def get_image(name, set, filename):
-    try:       
-        if (os.path.isfile('images/{}_{}.jpg'.format(set, name)) == 0):
-            api_url = "https://api.scryfall.com/cards/search?q=!"
+sryfallurl = "https://api.scryfall.com/cards/search?q=!"
+
+def get_image(name, set, filename, sort, num, row_number):
+    try:
+        zero = ''
+        num2 = num
+        if(sort): 
+            while row_number:
+                row_number = row_number // 10
+                if num2:
+                    num2 = num2 // 10 
+                    continue
+                zero += '0'       
+        if (os.path.isfile('images/{}_{}.jpg'.format(set, name)) == 0):           
             if set == 'Promo':
                 set = ''
-            api_url+=('"{}"set:"{}"'.format(name, set)) 
+            api_url = ('{}"{}"set:"{}"'.format(sryfallurl, name, set)) 
             r = requests.get(url = api_url) 
             data = r.json()
             dta = data['data']
             for i in dta:
-                    set = i['set_name']
+                    set = i['set_name'].replace(':', '')
                     print('Downloading {} from {}'.format(name, set))
                     img_data = requests.get(i['image_uris']['border_crop']).content
                     with open('images/{}_{}.jpg'.format(set, name), 'wb') as imghandler:
                         imghandler.write(img_data)
         else:
-            print('Found {} from {}'.format(set, name))
-        shutil.copy2('images/{}_{}.jpg'.format(set, name), '{}_img/{}_{}.jpg'.format(filename, set, name))
-        return set
+            print('Found {} from {}'.format(name, set))        
+        sort_set = '{}{}{}'.format(zero, num, set)
+        shutil.copy2('images/{}_{}.jpg'.format(set, name), '{}_img/{}_{}.jpg'.format(filename, sort_set, name))
+        return sort_set
 
     except Exception as e:
         if data['object'] == 'error':
-            print('{} from {} : {}'.format(set, name, data['details']))
+            print('{} from {} : {}'.format(name, set, data['details']))
 
         if e.args[0] == 'image_uris':
             img_data = requests.get(i['card_faces'][0]['image_uris']['border_crop']).content

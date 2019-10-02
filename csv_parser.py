@@ -11,6 +11,9 @@ def csv_convert(filename, sort, foilsheet):
             os.mkdir('{}_foil_img'.format(os.path.splitext(filename)[0])) 
     num = 0
     with open(filename, 'r') as file:
+        row_count = sum(1 for row in file) - 1
+    file.close()
+    with open(filename, 'r') as file:
         data = csv.reader(file, delimiter=',')
         next(data)
         filename = os.path.splitext(filename)[0]
@@ -27,22 +30,29 @@ def csv_convert(filename, sort, foilsheet):
                 except Exception as e:
                     print('Row parsing error: {}'.format(e))
                     pass
-                if (set == "Friday Night Magic") or (set == "Launch Parties") or (set == "Standard Showdown Promos") or (set == "Magic Game Day"):
+                if (set == "Friday Night Magic") or (set == "Launch Parties") or (set == "Standard Showdown Promos") or (set == "Magic Game Day") or (set == 'Magic Game Day Cards'):
                     set = 'Promo'
-                    promo = 1
+                    promo = True
                 if set.startswith('Prerelease Events'):
                     set = set.replace('Prerelease Events: ', '')
                     set = '{} Promos'.format(set)
                 if set.startswith('Magic 2'):
                     set = set.replace('Magic ', '') 
                     set = set.replace(' Core Set', '')
-                    set = 'Core Set {}'.format(set)
+                    set = 'Magic {}'.format(set)
+                if set.startswith('Modern Masters'):
+                    set = set.replace('Edition', '')
+                if set == 'Archenemy: Nicol Bolas':
+                    set = 'e01'
                 name = name.replace('//', '-')
-                set = images.get_image(name, set, filename)
-                images.edit_image(filename, name, set, lang, foil, quantity, promo, foilsheet)
-#Color of the card could be taken from scryfall tags
+                set = images.get_image(name, set, filename, sort, num, row_count)
+                images.edit_image(filename, set, name, lang, foil, quantity, promo, foilsheet)
+#Colors of the card could be taken from scryfall tags
 #Artifact Black Green Red UBlue White
 # WUBRG
 # WUBR WUBG WURG WBRG UBRG
 # WUB WUR WUG WBR WBG WRG UBR UBG URG BRG 
 # WU WB WR WG UB UR UG BR BG RG
+
+# BGRUW
+# 
